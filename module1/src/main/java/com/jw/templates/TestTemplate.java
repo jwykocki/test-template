@@ -1,4 +1,4 @@
-package com.jw.module1;
+package com.jw.templates;
 
 public class TestTemplate {
 
