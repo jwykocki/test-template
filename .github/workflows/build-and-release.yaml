@@ -3,7 +3,7 @@ name: Build and Release
 on:
   push:
     branches:
-      - main
+      - main  # Workflow uruchamia się, gdy commitujesz na gałąź main
 
 jobs:
   build:
@@ -16,7 +16,8 @@ jobs:
       - name: Set up Java
         uses: actions/setup-java@v3
         with:
-          java-version: '17'
+          java-version: '17'  # Ustaw odpowiednią wersję JDK, jeśli używasz innej
+          distribution: 'adoptopenjdk'  # Określenie dystrybucji JDK, np. 'adoptopenjdk', 'zulu', itp.
 
       - name: Build all modules with Maven
         run: mvn clean install --batch-mode --no-transfer-progress
@@ -26,7 +27,7 @@ jobs:
 
   release:
     runs-on: ubuntu-latest
-    needs: build
+    needs: build  # Release będzie uruchomione dopiero po zakończeniu buildu
     steps:
       - name: Checkout the repository
         uses: actions/checkout@v3
@@ -34,9 +35,11 @@ jobs:
       - name: Create a Git tag
         id: create_tag
         run: |
-          # Pobierz wersję z pom.xml lub ustaw ręcznie
+          # Pobieramy wersję z pom.xml
           VERSION=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)
           TAG="v$VERSION"
+          
+          # Tworzymy tag Git
           git tag -a "$TAG" -m "Release version $TAG"
           git push origin "$TAG"
 
@@ -44,7 +47,6 @@ jobs:
         uses: softprops/action-gh-release@v1
         with:
           files: |
-            **/target/*.jar
+            **/target/*.jar  # Dodaje wszystkie wygenerowane pliki JAR do releasu
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Token do autoryzacji z GitHubem
