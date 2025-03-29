@@ -16,8 +16,8 @@ jobs:
       - name: Set up Java
         uses: actions/setup-java@v3
         with:
-          java-version: '17'  # Ustaw odpowiednią wersję JDK, jeśli używasz innej
-          distribution: 'adoptopenjdk'  # Określenie dystrybucji JDK, np. 'adoptopenjdk', 'zulu', itp.
+          java-version: '17'  # Wersja JDK, którą chcesz używać
+          distribution: 'temurin'  # Używamy dystrybucji temurin (od Adoptium)
 
       - name: Build all modules with Maven
         run: mvn clean install --batch-mode --no-transfer-progress
