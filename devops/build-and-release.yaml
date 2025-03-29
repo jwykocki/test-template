@@ -1,0 +1,50 @@
+name: Build and Release
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout the repository
+        uses: actions/checkout@v3
+
+      - name: Set up Java
+        uses: actions/setup-java@v3
+        with:
+          java-version: '17'
+
+      - name: Build all modules with Maven
+        run: mvn clean install --batch-mode --no-transfer-progress
+
+      - name: Create JARs
+        run: mvn package --file pom.xml --batch-mode --no-transfer-progress
+
+  release:
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - name: Checkout the repository
+        uses: actions/checkout@v3
+
+      - name: Create a Git tag
+        id: create_tag
+        run: |
+          # Pobierz wersję z pom.xml lub ustaw ręcznie
+          VERSION=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)
+          TAG="v$VERSION"
+          git tag -a "$TAG" -m "Release version $TAG"
+          git push origin "$TAG"
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: |
+            **/target/*.jar
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
